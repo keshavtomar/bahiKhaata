@@ -146,62 +146,95 @@ app.post("/addlist", (req, res) => {
   let cost = req.body.cost;
   let items = req.body.items;
   let whopaid = req.body.whopaid;
-  let shareamong = req.body.shareamong;
   let comment = req.body.comment;
 
-console.log(keshavhkya);
+  let keshavshare = 0;
+  let sakshamshare = 0;
+  let sachinshare = 0;
+  let kishanshare = 0;
 
-  //agar un teeno m se kisi ne pay kiya to unke mujhpe bche hue paiso m se minus krdo
-  if (whopaid === "sachin") {
-    balance.sachinBalance -= cost;
-  } else if (whopaid === "kishan") {
-    balance.kishanBalance -= cost;
-  } else if (whopaid === "saksham") {
-    balance.sakshamBalance -= cost;
+  let shareamong = [];
+
+  if (req.body.keshavshare === "1") {
+    keshavshare = 1;
+  };
+  if (req.body.sakshamshare === "1") {
+    sakshamshare = 1;
+  }
+  if (req.body.kishanshare === "1") {
+    kishanshare = 1;
+  }
+  if (req.body.sachinshare === "1") {
+    sachinshare = 1;
   }
 
-  //ab kitne log h ye decide kro shareamong ki lenght se, aur uske hisaab se per person share kitna ho rha h
-  let sharelen = shareamong.length;
+  let sharelen = keshavshare + sachinshare + kishanshare + sakshamshare;
 
-  let eachshare = cost / sharelen;
+  if (sharelen === 0) {
+    res.redirect("/failurelist");
+  } else {
 
+    let eachshare = cost / sharelen;
 
-  //ab shareamong m jo jo log h unke hisse m ye share add krdo
-
-  for (var i = 0; i < sharelen; i++) {
-    if (shareamong[i] === "sachin") {
-      balance.sachinBalance += eachshare;
-    } else if (shareamong[i] === "kishan") {
-      balance.kishanBalance += eachshare;
-    } else if (shareamong[i] === "saksham") {
-      balance.sakshamBalance += eachshare;
-    } else if (shareamong[i] === "keshav") {
+    if(keshavshare===1){
       balance.keshavExpenses += eachshare;
+          shareamong.push("Keshav");
     }
+    if(sakshamshare===1){
+      balance.sakshamBalance += eachshare;
+          shareamong.push("Saksham");
+    }
+    if(kishanshare===1){
+      balance.kishanBalance += eachshare;
+      shareamong.push("Kishan");
+    }
+    if(sachinshare===1){
+      balance.sachinBalance += eachshare;
+      shareamong.push("Sachin");
+    }
+
+
+    //agar un teeno m se kisi ne pay kiya to unke mujhpe bche hue paiso m se minus krdo
+    if (whopaid === "sachin") {
+      balance.sachinBalance -= cost;
+    } else if (whopaid === "kishan") {
+      balance.kishanBalance -= cost;
+    } else if (whopaid === "saksham") {
+      balance.sakshamBalance -= cost;
+    }
+
+
+    // transferring one input data into the list
+    let singlelist = {
+      cost: cost,
+      items: items,
+      whopaid: whopaid,
+      shareamong: shareamong,
+      comment: comment,
+      listdate: date()
+    }
+
+    itemslist.push(singlelist);
+
+    console.log(itemslist);
+
+
+    res.redirect("/home");
   }
+})
 
-  //transferring one input data into the list
-  let singlelist = {
-    cost: cost,
-    items: items,
-    whopaid: whopaid,
-    shareamong: shareamong,
-    comment: comment,
-    listdate: date()
-  }
+app.get("/failurelist", (req, res) => {
+  res.render("failurelist");
+})
 
-  itemslist.push(singlelist);
-
-  console.log(itemslist);
-
-
-  res.redirect("/home");
+app.post("/failurelist", (req, res) => {
+  res.redirect("/addlist");
 })
 
 
 
 
 
-app.listen(1000, function() {
+app.listen(3000, function() {
   console.log("Server started at port 1000");
 })
