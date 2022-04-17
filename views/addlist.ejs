@@ -1,0 +1,80 @@
+<%- include('header'); %>
+
+<div class="text-center" style="margin-top:60px">
+  <h2 class="underline">Add expense</h2>
+  <div class="container bg-success p-2 text-dark bg-opacity-25">
+    <form class="pt-4" action="/addlist" method="post">
+      <div class="container" style="display:inline">
+        <label for="cost"><strong>Spent money : <span style="color:red;">*</span></strong></label>
+        <input type="number" name="cost" value="" required>
+      </div>
+
+      <div class="container" style="display:inline">
+        <label for="items"><strong>Items name : <span style="color:red;">*</span></strong></label>
+        <input type="text" name="items" value="" size="50" required>
+      </div>
+
+      <hr>
+
+      <div class="container">
+        <label for="whopaid"> <strong>Who Paid : <span style="color:red;">*</span></strong></label>
+        <div class="px-2" style="display:inline;">
+          <input type="radio" id="keshav" name="whopaid" value="keshav" checked>
+          <label for="keshav">Keshav</label>
+        </div>
+        <div class="px-2" style="display:inline;">
+          <input type="radio" id="sachin" name="whopaid" value="sachin">
+          <label for="sachin">Sachin</label>
+        </div>
+        <div class="px-2" style="display:inline;">
+          <input type="radio" id="saksham" name="whopaid" value="saksham">
+          <label for="saksham">Saksham</label>
+        </div>
+        <div class="px-2" style="display:inline;">
+          <input type="radio" id="kishan" name="whopaid" value="kishan">
+          <label for="kishan">Kishan</label>
+        </div>
+      </div>
+
+      <hr>
+
+      <div class="container">
+        <label for="shareamong"><strong>Shared among : <span style="color:red;">*</span> </strong></label>
+        <div class="px-2" style="display:inline;">
+          <input type="checkbox" id="keshav" name="shareamong" value="keshav" checked>
+          <label for="keshav">Keshav</label>
+        </div>
+        <div class="px-2" style="display:inline;">
+          <input type="checkbox" id="sachin" name="shareamong" value="sachin" checked>
+          <label for="sachin">Sachin</label>
+        </div>
+        <div class="px-2" style="display:inline;">
+          <input type="checkbox" id="saksham" name="shareamong" value="saksham" checked>
+          <label for="saksham">Saksham</label>
+        </div>
+        <div class="px-2" style="display:inline;">
+          <input type="checkbox" id="kishan" name="shareamong" value="kishan" checked>
+          <label for="kishan">Kishan</label>
+        </div>
+
+        <div class="px-2" style="display:inline;">
+           <span>(Total - <span class="sharedlength">4</span>)</span>
+        </div>
+      </div>
+
+      <hr>
+
+      <div class="container">
+        <label for="comment" style="display:block;"><strong>Add comments : (if any)</strong></label>
+        <textarea name="comment" rows="2" cols="100" placeholder="Add any comment about this expense"></textarea>
+      </div>
+
+      <hr>
+
+      <button class="px-5 btn btn-lg btn-outline-primary" type="submit" name="button">Add</button>
+    </form>
+  </div>
+  <br><br>
+</div>
+
+<%- include('footer'); %>

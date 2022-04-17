@@ -1,0 +1,20 @@
+<%- include('header'); %>
+
+<%for(var i=paymentsmade.length-1; i>=0; i--){%>
+
+<div class="card my-2">
+<%if(paymentsmade[i].amountPaid<0){%>
+  <h5 class="card-header" style="color:green">Paid by : me</h5>
+<%}else{%>
+  <h5 class="card-header" style="color:red">Paid by : <%=paymentsmade[i].paidby%></h5>
+  <%}%>
+  <div class="card-body">
+    <h5 class="card-title">Amount : <%=paymentsmade[i].amountPaid%></h5>
+    <h5 class="card-title">Paid on : <%=paymentsmade[i].ondate%></h5>
+    <p class="card-text">Descrtiption : <%=paymentsmade[i].paymentDescription%></p>
+  </div>
+</div>
+<%}%>
+
+
+<%- include('footer'); %>

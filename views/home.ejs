@@ -1,0 +1,50 @@
+<%- include('header.ejs'); %>
+
+<div class="container my-2 mx-auto">
+  <div class="row">
+    <div class="col col-lg-3 col-sm-12 border text-center" style="color:grey">
+      Keshav : <span class="individualBalance" style="color:green"> <%=balance.keshavExpenses%> </span>
+    </div>
+    <div class="col col-lg-3 col-sm-12 border text-center">
+      Sachin : <span class="individualBalance" style="color:green"> <%=balance.sachinBalance%> </span>
+    </div>
+    <div class="col col-lg-3 col-sm-12 border text-center">
+      Saksham : <span class="individualBalance" style="color:green"> <%=balance.sakshamBalance%> </span>
+    </div>
+    <div class="col col-lg-3 col-sm-12 border text-center">
+      Kishan : <span class="individualBalance" style="color:green"> <%=balance.kishanBalance%> </span>
+    </div>
+  </div>
+</div>
+
+<div class="container text-center pt-5">
+  <h1 class="underline">Money spent on</h1>
+</div>
+
+<%for(var i=itemslist.length-1; i>=0; i--){%>
+<div class="container py-2">
+  <div class="card">
+    <div class="card-header">
+      <div class="list-item">
+        Cost : <%=itemslist[i].cost%>
+      </div>
+      <div class="list-item">
+        Items : <%=itemslist[i].items%>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="list-item">
+        Paid By : <%=itemslist[i].whopaid%>
+      </div>
+      <div class="list-item">
+        Shared among : <%=itemslist[i].shareamong%>
+      </div>
+      <div class="list-item">
+        On Date : <%=itemslist[i].listdate%>
+      </div>
+    </div>
+  </div>
+</div>
+<%}%>
+
+<%- include('footer'); %>

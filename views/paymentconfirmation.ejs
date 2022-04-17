@@ -1,0 +1,21 @@
+<%- include('header'); %>
+
+<form class="" action="/paymentconfirm" method="post">
+  <div class="card" style="width: 18rem;">
+    <ul class="list-group list-group-flush">
+      <li class="list-group-item">
+        <h4>Paid by : <%=paidby%></h4>
+      </li>
+      <li class="list-group-item">
+        <h4>Payment amount : <%=amountPaid%></h4>
+      </li>
+      <li class="list-group-item">Payment description : <%=paymentDescription%></li>
+    </ul>
+    <button type="submit" name="confirmation">Confirm</button>
+  </div>
+</form>
+<form class="" action="/paymentcancel" method="post">
+  <button style="width:18rem;" type="submit" name="cancel">Cancel</button>
+</form>
+
+<%- include('footer'); %>

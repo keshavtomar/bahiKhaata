@@ -1,0 +1,62 @@
+<%- include('header'); %>
+
+<div class="container my-2 mx-auto">
+  <div class="row">
+    <div class="col col-lg-3 col-sm-12 border text-center" style="color:grey">
+      Keshav : <span class="individualBalance" style="color:green"> <%=balance.keshavExpenses%> </span>
+    </div>
+    <div class="col col-lg-3 col-sm-12 border text-center">
+      Sachin : <span class="individualBalance" style="color:green"> <%=balance.sachinBalance%> </span>
+    </div>
+    <div class="col col-lg-3 col-sm-12 border text-center">
+      Saksham : <span class="individualBalance" style="color:green"> <%=balance.sakshamBalance%> </span>
+    </div>
+    <div class="col col-lg-3 col-sm-12 border text-center">
+      Kishan : <span class="individualBalance" style="color:green"> <%=balance.kishanBalance%> </span>
+    </div>
+  </div>
+</div>
+
+<div class="container border border-primary" style="margin-top:100px">
+  <form class="bg-light" action="/payment" method="post">
+    <div class="firstQuestion">
+      <span>Who Paid: <span style="color:red;">*</span></span>
+      <div>
+        <input type="radio" id="huey" name="paidby" value="sachin" checked required>
+        <label for="huey">Sachin</label>
+      </div>
+
+      <div>
+        <input type="radio" id="dewey" name="paidby" value="kishan">
+        <label for="dewey">Kishan</label>
+      </div>
+
+      <div>
+        <input type="radio" id="louie" name="paidby" value="saksham">
+        <label for="louie">Saksham</label>
+      </div>
+    </div>
+
+    <br><hr><br>
+    <div class="secondQuestion">
+      <label for="amount">Amount Paid : <span style="color:red;">*</span></label>
+      <input type="number" name="amountPaid" value="" required>
+      <p style="color:#FF8C32">(please put negative sign if 'you' paid to the selected person)</p>
+    </div>
+
+    <br><hr><br>
+    <div class="description">
+       <label style="display:block;" for="description">Payment description</label>
+       <textarea name="paymentDescription" rows="8" cols="80"></textarea>
+    </div>
+
+    <br><hr><br>
+    <div class="submitButton">
+        <button class="btn btn-primary btn-lg" type="submit" name="button">Update</button>
+    </div>
+
+    <br><br />
+  </form>
+</div>
+
+<%- include('footer'); %>
