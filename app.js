@@ -3,23 +3,50 @@ const bodyParser = require('body-parser');
 const ejs = require('ejs');
 const _ = require('lodash');
 const date = require(__dirname + "/date.js");
+const mongoose = require('mongoose');
+
+mongoose.connect('mongodb+srv://admin-keshav:<password>@cluster0.obumt.mongodb.net/BahikhataDB', function(err) {
+  if (!err) {
+    console.log("Database connected successfully");
+  }
+})
+
+const Balance = new mongoose.model('Balance', {
+  name: String,
+  balanceAmount: Number
+})
+
+const List = new mongoose.model('List', {
+  cost: Number,
+  items: String,
+  whopaid: String,
+  shareamong: Array,
+  comment: String,
+  listdate: String
+})
+
+const Payment = new mongoose.model('Payment', {
+  paidby: String,
+  amountPaid: Number,
+  paymentDescription: String,
+  paymentdate: String
+})
+
 
 let today = date();
 //format of date will be April 13, 2022
-
-const paymentsmade = [];
-const itemslist = [];
 
 
 const setUserId = ["keshav", "sachin", "saksham", "kishan"];
 const setPassword = ["4510", "3808", "8053", "6923"];
 
 var balance = {
-  sachinBalance: 5,
-  kishanBalance: 5,
-  keshavExpenses: 0,
-  sakshamBalance: 0
+  sachinBalance : 0,
+  kishanBalance : 0,
+  keshavExpenses : 0,
+  sakshamBalance : 0
 }
+
 
 const app = express();
 
@@ -73,18 +100,44 @@ app.get("/home", (req, res) => {
   roundoffbalance.sakshamBalance = Math.floor(roundoffbalance.sakshamBalance * 100) / 100;
   roundoffbalance.kishanBalance = Math.floor(roundoffbalance.kishanBalance * 100) / 100;
 
-  res.render("home", {
-    balance: roundoffbalance,
-    itemslist: itemslist
-  });
+
+  List.find({}, function(err, docs) {
+    res.render("home", {
+      balance: roundoffbalance,
+      itemslist: docs
+    });
+  })
 })
 
 
 //payment page
 app.get("/payment", (req, res) => {
-  res.render("payment", {
-    balance: balance
-  });
+  if (flag != 0) {
+    res.render("payment", {
+      balance: balance
+    });
+  } else {
+    res.redirect("/");
+  }
+})
+
+app.get("/updatebalance", (req, res) => {
+  if (flag === 2) {
+    res.render("updatebalance");
+  } else {
+    res.redirect("/");
+  }
+})
+
+app.post("/updatebalance", (req, res) => {
+  balance.sachinBalance = req.body.sachinBalance;
+  balance.kishanBalance = req.body.kishanBalance;
+  balance.sakshamBalance = req.body.sakshamBalance;
+  balance.keshavExpenses = req.body.keshavExpenses;
+
+  updateBalance();
+
+  res.redirect("/home");
 })
 
 var amountPaid;
@@ -111,16 +164,18 @@ app.post("/paymentconfirm", (req, res) => {
     balance.sakshamBalance -= amountPaid;
   }
 
-  let singlepayment = {
+  updateBalance();
+
+  const Paymentmade = new Payment({
     paidby: paidby,
     amountPaid: amountPaid,
     paymentDescription: paymentDescription,
-    ondate: date()
-  }
+    paymentdate: date()
+  })
 
-  paymentsmade.push(singlepayment);
+  Paymentmade.save();
 
-  res.redirect("/home");
+  res.redirect("/allpayments");
 })
 
 
@@ -129,13 +184,20 @@ app.post("/paymentcancel", (req, res) => {
 })
 
 app.get("/allpayments", (req, res) => {
-  res.render("allpayments", {
-    paymentsmade: paymentsmade
-  });
+  Payment.find({}, function(err, payments) {
+    if (!err) {
+      res.render("allpayments", {
+        paymentsmade: payments
+      })
+    }
+  })
+
 })
 
 app.get("/addlist", (req, res) => {
-  res.render("addlist");
+  if (flag != 0) {
+    res.render("addlist");
+  }
 })
 
 
@@ -176,19 +238,19 @@ app.post("/addlist", (req, res) => {
 
     let eachshare = cost / sharelen;
 
-    if(keshavshare===1){
+    if (keshavshare === 1) {
       balance.keshavExpenses += eachshare;
-          shareamong.push("Keshav");
+      shareamong.push("Keshav");
     }
-    if(sakshamshare===1){
+    if (sakshamshare === 1) {
       balance.sakshamBalance += eachshare;
-          shareamong.push("Saksham");
+      shareamong.push("Saksham");
     }
-    if(kishanshare===1){
+    if (kishanshare === 1) {
       balance.kishanBalance += eachshare;
       shareamong.push("Kishan");
     }
-    if(sachinshare===1){
+    if (sachinshare === 1) {
       balance.sachinBalance += eachshare;
       shareamong.push("Sachin");
     }
@@ -203,21 +265,19 @@ app.post("/addlist", (req, res) => {
       balance.sakshamBalance -= cost;
     }
 
+    updateBalance();
 
     // transferring one input data into the list
-    let singlelist = {
+    const singlelist = new List({
       cost: cost,
       items: items,
       whopaid: whopaid,
       shareamong: shareamong,
       comment: comment,
       listdate: date()
-    }
+    })
 
-    itemslist.push(singlelist);
-
-    console.log(itemslist);
-
+    singlelist.save();
 
     res.redirect("/home");
   }
@@ -236,5 +296,87 @@ app.post("/failurelist", (req, res) => {
 
 
 app.listen(3000, function() {
-  console.log("Server started at port 1000");
+  console.log("Server started at port 3000");
 })
+
+
+
+
+
+
+
+
+
+//update balance function
+
+function updateBalance() {
+  const sachinBalance = new Balance({
+    name: "Sachin",
+    balanceAmount: balance.sachinBalance
+  })
+
+  const kishanBalance = new Balance({
+    name: "Kishan",
+    balanceAmount: balance.kishanBalance
+  })
+
+  const sakshamBalance = new Balance({
+    name: "Saksham",
+    balanceAmount: balance.sakshamBalance
+  })
+
+  const keshavExpenses = new Balance({
+    name: "Keshav",
+    balanceAmount: balance.keshavExpenses
+  })
+
+  const initialbalance = [sachinBalance, kishanBalance, sakshamBalance, keshavExpenses];
+
+  Balance.find({}, function(err, foundbalances) {
+    if (foundbalances.length === 0) {
+      Balance.insertMany(initialbalance, function(err) {
+        if (err) {
+          console.log(err);
+        }
+      })
+    }
+  })
+
+  Balance.findOneAndUpdate({
+    name: "Sachin"
+  }, {
+    balanceAmount: balance.sachinBalance
+  }, function(err) { //this won't work without a callback function
+    if (err) {
+      console.log(err);
+    }
+  })
+  Balance.findOneAndUpdate({
+    name: "Kishan"
+  }, {
+    balanceAmount: balance.kishanBalance
+  }, function(err) {
+    if (err) {
+      console.log(err);
+    }
+  })
+  Balance.findOneAndUpdate({
+    name: "Saksham"
+  }, {
+    balanceAmount: balance.sakshamBalance
+  }, function(err) {
+    if (err) {
+      console.log(err);
+    }
+  })
+  Balance.findOneAndUpdate({
+    name: "Keshav"
+  }, {
+    balanceAmount: balance.keshavExpenses
+  }, function(err) {
+    if (err) {
+      console.log(err);
+    }
+  })
+
+}

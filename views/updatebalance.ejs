@@ -1,0 +1,33 @@
+<%- include('header.ejs'); %>
+
+<div class="container my-4">
+
+  <form class="text-center form-control  my-5" action="/updatebalance" method="post">
+    <span>
+      <h1 class="form-label">Balance a specific person holds of yours</h1>
+      <p> <i>(write a negative sign before it, if you have his balance)</i></p>
+    </span>
+
+    <div class="form-label">
+      <label for="sachinBalance"><strong>Sachin : </strong></label>
+      <input type="number" name="sachinBalance" value="" required>
+    </div>
+    <div class="form-label">
+      <label for="kishanBalance"><strong>Kishan : </strong></label>
+      <input type="number" name="kishanBalance" value="" required>
+    </div>
+    <div class="form-label">
+      <label for="SakshamBalance"><strong>Saksham : </strong></label>
+      <input type="number" name="sakshamBalance" value="" required>
+    </div>
+    <div class="form-label">
+      <label for="KeshavExpenses"><strong>Keshav : </strong></label>
+      <input type="number" name="keshavExpenses" value="0" readonly>
+    </div>
+
+    <button class="btn btn-primary btn-lg px-5 my-3" type="submit" name="button">Update</button>
+  </form>
+
+</div>
+
+<%- include('footer'); %>
