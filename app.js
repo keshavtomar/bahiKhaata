@@ -5,9 +5,12 @@ const _ = require('lodash');
 const date = require(__dirname + "/date.js");
 const mongoose = require('mongoose');
 
-mongoose.connect('mongodb+srv://admin-keshav:<password>@cluster0.obumt.mongodb.net/BahikhataDB', function(err) {
+mongoose.connect('mongodb+srv://admin-keshav:Dheetja8@cluster0.obumt.mongodb.net/BahikhataDB', function(err) {
   if (!err) {
     console.log("Database connected successfully");
+  }
+  else{
+    console.log(err);
   }
 })
 
@@ -295,11 +298,7 @@ app.post("/failurelist", (req, res) => {
 
 
 
-app.listen(3000, function() {
-  console.log("Server started at port 3000");
-})
-
-
+app.listen(process.env.PORT||3000)
 
 
 
