@@ -2,4 +2,7 @@
 npm-debug.log
 .DS_Store
 /*.env
-/.vscode
+views/paymentconfirmation.ejs
+updatebalance.ejs
+failurelist.ejs
+failure.ejs

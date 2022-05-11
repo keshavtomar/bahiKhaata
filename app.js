@@ -1,22 +1,69 @@
+require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
 const ejs = require('ejs');
 const _ = require('lodash');
 const date = require(__dirname + "/date.js");
 const mongoose = require('mongoose');
+const session = require('express-session');
+const passport = require('passport');
+const passportLocalMongoose = require('passport-local-mongoose');
+
+const app = express();
+
+app.set('view engine', 'ejs');
+
+app.use(bodyParser.urlencoded({
+  extended: true
+}));
+
+app.use(express.static("public"));
+
+app.use(session({
+  secret: process.env.SECRET,
+  resave: false,
+  saveUninitialized: false
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
 
 mongoose.connect('mongodb+srv://admin-keshav:Dheetja8@cluster0.obumt.mongodb.net/BahikhataDB', function(err) {
   if (!err) {
     console.log("Database connected successfully");
-  }
-  else{
+  } else {
     console.log(err);
   }
 })
 
+const userSchema = new mongoose.Schema({
+  username: String,
+  password: String
+})
+
+userSchema.plugin(passportLocalMongoose);
+
+
+const User = new mongoose.model('User', userSchema);
+
+passport.use(User.createStrategy());
+
+passport.serializeUser(function(user, done) {
+  done(null, user.id);
+});
+
+passport.deserializeUser(function(id, done) {
+  User.findById(id, function(err, user) {
+    done(err, user);
+  });
+})
+
+
 const Balance = new mongoose.model('Balance', {
-  name: String,
-  balanceAmount: Number
+  sachinBalance: Number,
+  kishanBalance: Number,
+  sakshamBalance: Number,
+  keshavExpenses: Number
 })
 
 const List = new mongoose.model('List', {
@@ -25,7 +72,8 @@ const List = new mongoose.model('List', {
   whopaid: String,
   shareamong: Array,
   comment: String,
-  listdate: String
+  listdate: String,
+  updatedBy: String
 })
 
 const Payment = new mongoose.model('Payment', {
@@ -40,166 +88,208 @@ let today = date();
 //format of date will be April 13, 2022
 
 
-const setUserId = ["keshav", "sachin", "saksham", "kishan"];
-const setPassword = ["4510", "3808", "8053", "6923"];
+// // -------------------------------------------->           uncomment the register route if you want to add more users to this app
+// app.get("/register",(req,res)=>{
+// res.render("register", {mssg: null});
+// })
+//
+// app.post("/register", (req, res) => {
+//   User.register({
+//     username: req.body.username
+//   }, req.body.password, function(err, user) {
+//     if (err) {
+//       console.log(err);
+//     } else {
+//       passport.authenticate("local")(req, res, function() {
+//         res.render("register",{mssg:"Registered successfully"});
+//       })
+//     }
+//   })
+// })
 
-var balance = {
-  sachinBalance : 0,
-  kishanBalance : 0,
-  keshavExpenses : 0,
-  sakshamBalance : 0
-}
 
+app.get("/login", (req, res) => {
+  res.render("login", {
+    msg: null
+  });
+});
 
-const app = express();
+app.post("/login", (req, res) => {
+  const user = new User({
+    username: req.body.username,
+    password: req.body.password
+  });
 
-app.set('view engine', 'ejs');
-
-app.use(bodyParser.urlencoded({
-  extended: true
-}));
-
-app.use(express.static("public"));
-
-app.get("/", (req, res) => {
-  res.render("signin");
-})
-
-let flag = 0;
-
-app.post("/", (req, res) => {
-  const userid = _.lowerCase(req.body.userid);
-  const password = req.body.password;
-
-  for (var i = 0; i < setUserId.length; i++) {
-    if (userid === setUserId[i] && password === setPassword[i]) {
-      if (i == 0) {
-        flag = 2; //if the user is keshav
-      } else {
-        flag = 1;
-      }
-      res.redirect("/home");
+  req.login(user, function(err) {
+    if (err) {
+      res.redirect("/login");
+    } else {
+      passport.authenticate("local")(req, res, function() {
+        res.redirect("/");
+      })
     }
-  }
-  if (flag === 0) {
-    res.redirect("/failure");
-  }
+  })
 })
 
-app.get("/failure", (req, res) => {
-  res.render("failure");
-})
 
 app.post("/failure", (req, res) => {
   res.redirect("/");
 })
 
-app.get("/home", (req, res) => {
-  // reducing the balance value to two decimal points before actual values are not rounded off, only the values to show have been rounded off
+app.get("/", (req, res) => {
+  Balance.findOne({}, function(err, resultingbalance) {
+    if (err) {
+      console.log(err);
+    } else {
+      List.find({}, function(err, docs) {
+        if (err) {
+          console.log(err);
+        } else {
+          //rounding off
 
-  let roundoffbalance = balance;
-  roundoffbalance.keshavExpenses = Math.floor(roundoffbalance.keshavExpenses * 100) / 100;
-  roundoffbalance.sachinBalance = Math.floor(roundoffbalance.sachinBalance * 100) / 100;
-  roundoffbalance.sakshamBalance = Math.floor(roundoffbalance.sakshamBalance * 100) / 100;
-  roundoffbalance.kishanBalance = Math.floor(roundoffbalance.kishanBalance * 100) / 100;
+          resultingbalance.sachinBalance = Math.round(resultingbalance.sachinBalance);
+          resultingbalance.kishanBalance = Math.round(resultingbalance.kishanBalance);
+          resultingbalance.sakshamBalance = Math.round(resultingbalance.sakshamBalance);
+          resultingbalance.keshavExpenses = Math.round(resultingbalance.keshavExpenses);
 
-
-  List.find({}, function(err, docs) {
-    res.render("home", {
-      balance: roundoffbalance,
-      itemslist: docs
-    });
-  })
+          res.render("home", {
+            balance: resultingbalance,
+            itemslist: docs,
+            user: req.user
+          });
+        }
+      });
+    }
+  });
 })
 
 
 //payment page
 app.get("/payment", (req, res) => {
-  if (flag != 0) {
-    res.render("payment", {
-      balance: balance
+  if (req.isAuthenticated() && req.user.username === "Keshav") {
+    Balance.findOne({}, function(err, resultingbalance) {
+      if (err) {
+        console.log(err);
+      } else {
+        //rounding off
+
+        resultingbalance.sachinBalance = Math.round(resultingbalance.sachinBalance);
+        resultingbalance.kishanBalance = Math.round(resultingbalance.kishanBalance);
+        resultingbalance.sakshamBalance = Math.round(resultingbalance.sakshamBalance);
+        resultingbalance.keshavExpenses = Math.round(resultingbalance.keshavExpenses);
+
+
+        res.render("payment", {
+          balance: resultingbalance,
+          user: req.user
+        })
+      }
+    })
+  } else {
+    res.render("login", {
+      msg: "Please login as admin to add payments"
     });
-  } else {
-    res.redirect("/");
   }
 })
 
-app.get("/updatebalance", (req, res) => {
-  if (flag === 2) {
-    res.render("updatebalance");
-  } else {
-    res.redirect("/");
-  }
-})
-
-app.post("/updatebalance", (req, res) => {
-  balance.sachinBalance = req.body.sachinBalance;
-  balance.kishanBalance = req.body.kishanBalance;
-  balance.sakshamBalance = req.body.sakshamBalance;
-  balance.keshavExpenses = req.body.keshavExpenses;
-
-  updateBalance();
-
-  res.redirect("/home");
-})
-
-var amountPaid;
-var paidby;
-var paymentDescription;
 
 app.post("/payment", (req, res) => {
-  amountPaid = req.body.amountPaid;
-  paidby = req.body.paidby;
-  paymentDescription = req.body.paymentDescription;
-  res.render("paymentconfirmation", {
-    amountPaid: amountPaid,
-    paidby: paidby,
-    paymentDescription: paymentDescription
-  })
-})
-
-app.post("/paymentconfirm", (req, res) => {
+  const amountPaid = req.body.amountPaid;
+  const paidby = req.body.paidby;
+  const paymentDescription = req.body.paymentDescription;
   if (paidby === "sachin") {
-    balance.sachinBalance -= amountPaid;
+    Balance.findOne({}, function(err, response) {
+      if (!err) {
+        const newbalance = response.sachinBalance - amountPaid;
+        Balance.updateOne({}, {
+          sachinBalance: newbalance
+        }, function(err) {
+          if (!err) {
+            const Paymentmade = new Payment({
+              paidby: paidby,
+              amountPaid: amountPaid,
+              paymentDescription: paymentDescription,
+              paymentdate: date()
+            })
+
+            Paymentmade.save();
+
+            res.redirect("/allpayments");
+          }
+        })
+      }
+    })
   } else if (paidby === "kishan") {
-    balance.kishanBalance -= amountPaid;
+    Balance.findOne({}, function(err, response) {
+      if (!err) {
+        const newbalance = response.kishanBalance - amountPaid;
+        Balance.updateOne({}, {
+          kishanBalance: newbalance
+        }, function(err) {
+          if (!err) {
+            const Paymentmade = new Payment({
+              paidby: paidby,
+              amountPaid: amountPaid,
+              paymentDescription: paymentDescription,
+              paymentdate: date()
+            })
+
+            Paymentmade.save();
+
+            res.redirect("/allpayments");
+          }
+        })
+      }
+    })
   } else if (paidby === "saksham") {
-    balance.sakshamBalance -= amountPaid;
+    Balance.findOne({}, function(err, response) {
+      if (!err) {
+        const newbalance = response.sakshamBalance - amountPaid;
+        Balance.updateOne({}, {
+          sakshamBalance: newbalance
+        }, function(err) {
+          if (!err) {
+            const Paymentmade = new Payment({
+              paidby: paidby,
+              amountPaid: amountPaid,
+              paymentDescription: paymentDescription,
+              paymentdate: date()
+            })
+
+            Paymentmade.save();
+
+            res.redirect("/allpayments");
+          }
+        })
+      }
+    })
   }
-
-  updateBalance();
-
-  const Paymentmade = new Payment({
-    paidby: paidby,
-    amountPaid: amountPaid,
-    paymentDescription: paymentDescription,
-    paymentdate: date()
-  })
-
-  Paymentmade.save();
-
-  res.redirect("/allpayments");
 })
 
 
 app.post("/paymentcancel", (req, res) => {
-  res.redirect("/home");
+  res.redirect("/");
 })
 
 app.get("/allpayments", (req, res) => {
   Payment.find({}, function(err, payments) {
     if (!err) {
       res.render("allpayments", {
-        paymentsmade: payments
+        paymentsmade: payments,
+        user: req.user
       })
     }
   })
-
 })
 
 app.get("/addlist", (req, res) => {
-  if (flag != 0) {
-    res.render("addlist");
+  if (req.isAuthenticated()) {
+    res.render("addlist", {
+      msg: null,
+      user: req.user
+    });
+  } else {
+    res.redirect("/login");
   }
 })
 
@@ -236,39 +326,111 @@ app.post("/addlist", (req, res) => {
   let sharelen = keshavshare + sachinshare + kishanshare + sakshamshare;
 
   if (sharelen === 0) {
-    res.redirect("/failurelist");
+    res.render("addlist", {
+      msg: "The item you purchased should be shared with at least one person",
+      user: req.user
+    });
+  } else if ((kishanshare === 0 && whopaid == "kishan") || (sachinshare === 0 && whopaid == "sachin") || (sakshamshare === 0 && whopaid == "saksham")) {
+    res.render("addlist", {
+      msg: "Error! You should not pay if you are not involved in the share, handle it yourself, FOOL",
+      user: req.user
+    });
   } else {
-
     let eachshare = cost / sharelen;
 
     if (keshavshare === 1) {
-      balance.keshavExpenses += eachshare;
+      Balance.findOne({}, function(err, response) {
+        if (!err) {
+          const newbalance = response.keshavExpenses + eachshare;
+          Balance.updateOne({}, {
+            keshavExpenses: newbalance
+          }, function(err) {
+            if (err) {
+              console.log(err);
+            }
+          })
+        }
+      })
       shareamong.push("Keshav");
     }
     if (sakshamshare === 1) {
-      balance.sakshamBalance += eachshare;
+      Balance.findOne({}, function(err, response) {
+        if (!err) {
+          if (whopaid === "saksham") {
+            const newbalance = response.sakshamBalance + eachshare - cost;
+            Balance.updateOne({}, {
+              sakshamBalance: newbalance
+            }, function(err) {
+              if (err) {
+                console.log(err);
+              }
+            })
+          } else {
+            const newbalance = response.sakshamBalance + eachshare;
+            Balance.updateOne({}, {
+              sakshamBalance: newbalance
+            }, function(err) {
+              if (err) {
+                console.log(err);
+              }
+            })
+          }
+        }
+      })
       shareamong.push("Saksham");
     }
     if (kishanshare === 1) {
-      balance.kishanBalance += eachshare;
+      Balance.findOne({}, function(err, response) {
+        if (!err) {
+          if (whopaid === "kishan") {
+            const newbalance = response.kishanBalance + eachshare - cost;
+            Balance.updateOne({}, {
+              kishanBalance: newbalance
+            }, function(err) {
+              if (err) {
+                console.log(err);
+              }
+            })
+          } else {
+            const newbalance = response.kishanBalance + eachshare;
+            Balance.updateOne({}, {
+              kishanBalance: newbalance
+            }, function(err) {
+              if (err) {
+                console.log(err);
+              }
+            })
+          }
+        }
+      })
       shareamong.push("Kishan");
     }
     if (sachinshare === 1) {
-      balance.sachinBalance += eachshare;
+      Balance.findOne({}, function(err, response) {
+        if (!err) {
+          if (whopaid === "sachin") {
+            const newbalance = response.sachinBalance + eachshare - cost;
+            Balance.updateOne({}, {
+              sachinBalance: newbalance
+            }, function(err) {
+              if (err) {
+                console.log(err);
+              }
+            })
+          } else {
+            const newbalance = response.sachinBalance + eachshare;
+            Balance.updateOne({}, {
+              sachinBalance: newbalance
+            }, function(err) {
+              if (err) {
+                console.log(err);
+              }
+            })
+          }
+        }
+      })
       shareamong.push("Sachin");
     }
-
-
-    //agar un teeno m se kisi ne pay kiya to unke mujhpe bche hue paiso m se minus krdo
-    if (whopaid === "sachin") {
-      balance.sachinBalance -= cost;
-    } else if (whopaid === "kishan") {
-      balance.kishanBalance -= cost;
-    } else if (whopaid === "saksham") {
-      balance.sakshamBalance -= cost;
-    }
-
-    updateBalance();
 
     // transferring one input data into the list
     const singlelist = new List({
@@ -277,34 +439,35 @@ app.post("/addlist", (req, res) => {
       whopaid: whopaid,
       shareamong: shareamong,
       comment: comment,
-      listdate: date()
+      listdate: date(),
+      updatedBy: req.user.username
     })
 
     singlelist.save();
 
-    res.redirect("/home");
+    res.redirect("/");
   }
 })
 
-app.get("/failurelist", (req, res) => {
-  res.render("failurelist");
-})
 
-app.post("/failurelist", (req, res) => {
-  res.redirect("/addlist");
-})
+// app.get("/updatebalance", (req, res) => {
+//   res.render("updatebalance");
+// })
+//
+// app.post("/updatebalance", (req, res) => {
+//   balance.sachinBalance = req.body.sachinBalance;
+//   balance.kishanBalance = req.body.kishanBalance;
+//   balance.sakshamBalance = req.body.sakshamBalance;
+//   balance.keshavExpenses = req.body.keshavExpenses;
+//
+//   updateBalance();
+//
+//   res.redirect("/");
+// })
 
-
-
-
-
-let port = process.env.PORT;
-if (port == null || port == "") {
-  port = 3000;
-}
-
-app.listen(port, function() {
-  console.log("Server started on port 3000");
+app.get("/logout", function(req, res) {
+  req.logout();
+  res.redirect('/');
 });
 
 
@@ -312,76 +475,12 @@ app.listen(port, function() {
 
 
 
-//update balance function
 
-function updateBalance() {
-  const sachinBalance = new Balance({
-    name: "Sachin",
-    balanceAmount: balance.sachinBalance
-  })
-
-  const kishanBalance = new Balance({
-    name: "Kishan",
-    balanceAmount: balance.kishanBalance
-  })
-
-  const sakshamBalance = new Balance({
-    name: "Saksham",
-    balanceAmount: balance.sakshamBalance
-  })
-
-  const keshavExpenses = new Balance({
-    name: "Keshav",
-    balanceAmount: balance.keshavExpenses
-  })
-
-  const initialbalance = [sachinBalance, kishanBalance, sakshamBalance, keshavExpenses];
-
-  Balance.find({}, function(err, foundbalances) {
-    if (foundbalances.length === 0) {
-      Balance.insertMany(initialbalance, function(err) {
-        if (err) {
-          console.log(err);
-        }
-      })
-    }
-  })
-
-  Balance.findOneAndUpdate({
-    name: "Sachin"
-  }, {
-    balanceAmount: balance.sachinBalance
-  }, function(err) { //this won't work without a callback function
-    if (err) {
-      console.log(err);
-    }
-  })
-  Balance.findOneAndUpdate({
-    name: "Kishan"
-  }, {
-    balanceAmount: balance.kishanBalance
-  }, function(err) {
-    if (err) {
-      console.log(err);
-    }
-  })
-  Balance.findOneAndUpdate({
-    name: "Saksham"
-  }, {
-    balanceAmount: balance.sakshamBalance
-  }, function(err) {
-    if (err) {
-      console.log(err);
-    }
-  })
-  Balance.findOneAndUpdate({
-    name: "Keshav"
-  }, {
-    balanceAmount: balance.keshavExpenses
-  }, function(err) {
-    if (err) {
-      console.log(err);
-    }
-  })
-
+let port = process.env.PORT;
+if (port == null || port == "") {
+  port = 300;
 }
+
+app.listen(port, function() {
+  console.log("Server started on port 300");
+});

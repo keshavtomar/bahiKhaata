@@ -4,6 +4,9 @@
   <h2 class="underline">Add expense</h2>
   <div class="container bg-success p-2 text-dark bg-opacity-25">
     <form class="pt-4" action="/addlist" method="post">
+      <% if(msg) { %>
+      <div class="alert alert-danger" role="alert"><%= msg %></div>
+      <% } %>
       <div class="container" style="display:inline">
         <label for="cost"><strong>Spent money : <span style="color:red;">*</span></strong></label>
         <input type="number" name="cost" value="" required>

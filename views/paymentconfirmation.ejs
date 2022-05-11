@@ -1,21 +1,26 @@
 <%- include('header'); %>
 
-<form class="" action="/paymentconfirm" method="post">
-  <div class="card" style="width: 18rem;">
-    <ul class="list-group list-group-flush">
-      <li class="list-group-item">
-        <h4>Paid by : <%=paidby%></h4>
-      </li>
-      <li class="list-group-item">
-        <h4>Payment amount : <%=amountPaid%></h4>
-      </li>
-      <li class="list-group-item">Payment description : <%=paymentDescription%></li>
-    </ul>
-    <button type="submit" name="confirmation">Confirm</button>
-  </div>
-</form>
-<form class="" action="/paymentcancel" method="post">
-  <button style="width:18rem;" type="submit" name="cancel">Cancel</button>
-</form>
+<div class="container text-center">
+  <form class="mx-auto" action="/paymentconfirm" method="post">
+    <div class="card mx-auto" style="width: 18rem;">
+      <ul class="list-group list-group-flush">
+        <li class="list-group-item">
+          <h4>Paid by : <input type="number" name="paidby" value="<%=paidby%>" readonly></h4>
+        </li>
+        <li class="list-group-item">
+          <h4>Payment amount : <input type="number" name="amountPaid" value="<%=amountPaid%>" readonly></h4>
+        </li>
+        <li class="list-group-item">Payment description : <input type="number" name="paymentDescription" value="<%=paymentDescription%>" readonly></li>
+      </ul>
+      <button class="btn btn-outline-warning" type="submit" name="confirmation">Confirm</button>
+    </div>
+  </form>
+  <form action="/paymentcancel" method="post">
+    <div class="card mx-auto" style="width: 18rem;">
+    <button class="btn btn-outline-warning" style="width:18rem;" type="submit" name="cancel">Cancel</button>
+    </div>
+  </form>
+</div>
+
 
 <%- include('footer'); %>

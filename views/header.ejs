@@ -25,10 +25,17 @@
       </div>
       <ul class="nav navbar-nav navbar-right">
         <!-- 6 -->
-        <li id="home" class="mx-3"><a href="/home">HOME</a></li>
+        <li id="home" class="mx-3"><a href="/">HOME</a></li>
         <li id="about" class="mx-3"><a href="/allPayments">PREVIOUS PAYMENTS</a></li>
         <li id="contact" class="mx-3"><a href="/payment">PAYMENT</a></li>
         <li id="contact" class="mx-3"><a href="/addlist">ADD LIST</a></li>
+        <% if(user) { %>
+        <li id="nothing" class="ms-1 me-3">Hello,<%=user.username%></li>
+        <li class="mx-1"><a href="/logout"><button class="btn btn-outline-secondary py-0">Log Out</button></a></li>
+        <% } %>
+        <% if(!user) { %>
+        <li class="mx-1"><a href="/login"><button class="btn btn-outline-secondary py-0">Log In</button></a></li>
+        <% } %>
       </ul>
     </div>
   </nav>

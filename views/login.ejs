@@ -29,13 +29,16 @@
 </head>
 
 <body class="text-center">
-  <form class="form-signin" method="post">
+  <form class="form-signin" action="/login" method="post">
     <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
-    <input type=id="inputid" class="form-control" name="userid" placeholder="Id goes here" required autofocus>
+    <input type=id="inputid" class="form-control" name="username" placeholder="Id goes here" required autofocus>
     <input style="display:inline;" type="password" id="inputPassword" name="password" class="form-control" placeholder="Password" required>
     <i id="togglePassword" style="display:inline;" class="fa-solid fa-eye-low-vision"></i>
     </div>
-    <button class="w-100 my-2 btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+    <button class="w-100 my-2 btn btn-lg btn-primary btn-block" type="submit">Log in</button>
+    <% if(msg) { %>
+    <div class="alert alert-danger" role="alert"><%= msg %></div>
+    <% } %>
   </form>
 
 
