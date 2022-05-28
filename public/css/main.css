@@ -1,32 +1,46 @@
-*{
+* {
   font-family: 'Oswald', sans-serif;
   letter-spacing: 0.08rem;
 }
 
 .navbar {
-    padding-top: 15px;
-    padding-bottom: 15px;
-    border: 0;
-    border-radius: 0;
-    margin-bottom: 0;
-    font-size: 12px;
-    letter-spacing: 5px;
+  padding-top: 15px;
+  padding-bottom: 15px;
+  border: 0;
+  border-radius: 0;
+  margin-bottom: 0;
+  font-size: 12px;
+  letter-spacing: 5px;
 }
 
-.navbar-nav  li a:hover {
-    color: #1abc9c !important;
-    text-decoration: overline;
+.navbar-nav li a:hover {
+  color: #1abc9c !important;
+  text-decoration: overline;
 }
 
-.underline{
+.underline {
   text-decoration: underline;
 }
 
-a{
+a {
   text-decoration: none;
 }
 
-.list-item{
+.list-item {
   display: inline;
   margin: auto 3%;
+}
+
+div .delete-list {
+  position: absolute;
+  right: 10px;
+}
+
+.delete-list button {
+  border: none;
+  border-radius: 20%;
+}
+
+.delete-list button:hover{
+  background-color: red;
 }
