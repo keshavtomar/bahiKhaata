@@ -28,40 +28,40 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-mongoose.connect('mongodb+srv://keshavtomar:keshav123@cluster0.ibzyjol.mongodb.net/?retryWrites=true&w=majority/BahikhaataDB', function (err, res) {
-  if (!err) {
-    console.log("Database connected successfully");
-  } else {
-    console.log(err);
-  }
-})
+// mongoose.connect('mongodb+srv://keshavtomar:keshav123@cluster0.ibzyjol.mongodb.net/?retryWrites=true&w=majority/BahikhaataDB', function (err, res) {
+//   if (!err) {
+//     console.log("Database connected successfully");
+//   } else {
+//     console.log(err);
+//   }
+// })
 
 // const mongoose = require('mongoose');
 
-// mongoose.connect('mongodb+srv://keshavtomar:keshav123@cluster0.ibzyjol.mongodb.net/BahikhaataDB', { useNewUrlParser: true, useUnifiedTopology: true }, (err) => {
-//     if (err) {
-//         console.error("Error connecting to the database: " + err);
-//     } else {
-//         // Define the Balance model based on your schema
-//         const Balance = mongoose.model('Balance', {
-//           sachinBalance: Number,
-//           kishanBalance: Number,
-//           sakshamBalance: Number,
-//           keshavExpenses: Number
-//         });
+mongoose.connect('mongodb+srv://keshavtomar:keshav123@cluster0.ibzyjol.mongodb.net/BahikhaataDB', { useNewUrlParser: true, useUnifiedTopology: true }, (err) => {
+    if (err) {
+        console.error("Error connecting to the database: " + err);
+    } else {
+        // Define the Balance model based on your schema
+        // const Balance = mongoose.model('Balance', {
+        //   sachinBalance: Number,
+        //   kishanBalance: Number,
+        //   sakshamBalance: Number,
+        //   keshavExpenses: Number
+        // });
 
-//         // Find all documents in the "Balance" collection
-//         Balance.findOne({}, (err, data) => {
-//             if (err) {
-//                 console.error("Error querying the 'Balance' collection: " + err);
-//             } else {
-//                 console.log("Data in the 'Balance' collection:");
-//                 console.log(data);
-//             }
-//             mongoose.connection.close(); // Close the connection when done
-//         });
-//     }
-// });
+        // // Find all documents in the "Balance" collection
+        // Balance.findOne({}, (err, data) => {
+        //     if (err) {
+        //         console.error("Error querying the 'Balance' collection: " + err);
+        //     } else {
+        //         console.log("Data in the 'Balance' collection:");
+        //         console.log(data);
+        //     }
+        //     mongoose.connection.close(); // Close the connection when done
+        // });
+    }
+});
 
 
 const userSchema = new mongoose.Schema({
@@ -116,11 +116,11 @@ let today = date();
 //format of date will be April 13, 2022
 
 
-// // -------------------------------------------->           uncomment the register route if you want to add more users to this app
+// -------------------------------------------->           uncomment the register route if you want to add more users to this app
 // app.get("/register",(req,res)=>{
 // res.render("register", {mssg: null});
 // })
-//
+
 // app.post("/register", (req, res) => {
 //   User.register({
 //     username: req.body.username
@@ -190,15 +190,6 @@ app.get("/", (req, res) => {
       });
     }
   });
-  // Balance.find({}, (err, data) => {
-  //   if (err) {
-  //     console.error("Error querying the 'Balance' collection: " + err);
-  //   } else {
-  //     console.log("Data in the 'Balance' collection:");
-  //     console.log(data);
-  //   }
-  //   mongoose.connection.close(); // Close the connection when done
-  // });
 })
 
 
