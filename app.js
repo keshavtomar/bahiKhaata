@@ -28,13 +28,41 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-mongoose.connect('mongodb+srv://admin-keshav:Dheetja8@cluster0.obumt.mongodb.net/BahikhataDB', function(err) {
+mongoose.connect('mongodb+srv://keshavtomar:keshav123@cluster0.ibzyjol.mongodb.net/?retryWrites=true&w=majority/BahikhaataDB', function (err, res) {
   if (!err) {
     console.log("Database connected successfully");
   } else {
     console.log(err);
   }
 })
+
+// const mongoose = require('mongoose');
+
+// mongoose.connect('mongodb+srv://keshavtomar:keshav123@cluster0.ibzyjol.mongodb.net/BahikhaataDB', { useNewUrlParser: true, useUnifiedTopology: true }, (err) => {
+//     if (err) {
+//         console.error("Error connecting to the database: " + err);
+//     } else {
+//         // Define the Balance model based on your schema
+//         const Balance = mongoose.model('Balance', {
+//           sachinBalance: Number,
+//           kishanBalance: Number,
+//           sakshamBalance: Number,
+//           keshavExpenses: Number
+//         });
+
+//         // Find all documents in the "Balance" collection
+//         Balance.findOne({}, (err, data) => {
+//             if (err) {
+//                 console.error("Error querying the 'Balance' collection: " + err);
+//             } else {
+//                 console.log("Data in the 'Balance' collection:");
+//                 console.log(data);
+//             }
+//             mongoose.connection.close(); // Close the connection when done
+//         });
+//     }
+// });
+
 
 const userSchema = new mongoose.Schema({
   username: String,
@@ -48,12 +76,12 @@ const User = new mongoose.model('User', userSchema);
 
 passport.use(User.createStrategy());
 
-passport.serializeUser(function(user, done) {
+passport.serializeUser(function (user, done) {
   done(null, user.id);
 });
 
-passport.deserializeUser(function(id, done) {
-  User.findById(id, function(err, user) {
+passport.deserializeUser(function (id, done) {
+  User.findById(id, function (err, user) {
     done(err, user);
   });
 })
@@ -120,11 +148,11 @@ app.post("/login", (req, res) => {
     password: req.body.password
   });
 
-  req.login(user, function(err) {
+  req.login(user, function (err) {
     if (err) {
       res.redirect("/login");
     } else {
-      passport.authenticate("local")(req, res, function() {
+      passport.authenticate("local")(req, res, function () {
         res.redirect("/");
       })
     }
@@ -137,7 +165,8 @@ app.post("/failure", (req, res) => {
 })
 
 app.get("/", (req, res) => {
-  Balance.findOne({}, function(err, resultingbalance) {
+  Balance.findOne({}, (err,resultingbalance) => {
+    console.log("this is it     " + resultingbalance);
     if (err) {
       console.log(err);
     } else {
@@ -161,13 +190,22 @@ app.get("/", (req, res) => {
       });
     }
   });
+  // Balance.find({}, (err, data) => {
+  //   if (err) {
+  //     console.error("Error querying the 'Balance' collection: " + err);
+  //   } else {
+  //     console.log("Data in the 'Balance' collection:");
+  //     console.log(data);
+  //   }
+  //   mongoose.connection.close(); // Close the connection when done
+  // });
 })
 
 
 //payment page
 app.get("/payment", (req, res) => {
   if (req.isAuthenticated() && req.user.username === "Keshav") {
-    Balance.findOne({}, function(err, resultingbalance) {
+    Balance.findOne({}, function (err, resultingbalance) {
       if (err) {
         console.log(err);
       } else {
@@ -198,12 +236,12 @@ app.post("/payment", (req, res) => {
   const paidby = req.body.paidby;
   const paymentDescription = req.body.paymentDescription;
   if (paidby === "sachin") {
-    Balance.findOne({}, function(err, response) {
+    Balance.findOne({}, function (err, response) {
       if (!err) {
         const newbalance = response.sachinBalance - amountPaid;
         Balance.updateOne({}, {
           sachinBalance: newbalance
-        }, function(err) {
+        }, function (err) {
           if (!err) {
             const Paymentmade = new Payment({
               paidby: paidby,
@@ -220,12 +258,12 @@ app.post("/payment", (req, res) => {
       }
     })
   } else if (paidby === "kishan") {
-    Balance.findOne({}, function(err, response) {
+    Balance.findOne({}, function (err, response) {
       if (!err) {
         const newbalance = response.kishanBalance - amountPaid;
         Balance.updateOne({}, {
           kishanBalance: newbalance
-        }, function(err) {
+        }, function (err) {
           if (!err) {
             const Paymentmade = new Payment({
               paidby: paidby,
@@ -242,12 +280,12 @@ app.post("/payment", (req, res) => {
       }
     })
   } else if (paidby === "saksham") {
-    Balance.findOne({}, function(err, response) {
+    Balance.findOne({}, function (err, response) {
       if (!err) {
         const newbalance = response.sakshamBalance - amountPaid;
         Balance.updateOne({}, {
           sakshamBalance: newbalance
-        }, function(err) {
+        }, function (err) {
           if (!err) {
             const Paymentmade = new Payment({
               paidby: paidby,
@@ -272,7 +310,7 @@ app.post("/paymentcancel", (req, res) => {
 })
 
 app.get("/allpayments", (req, res) => {
-  Payment.find({}, function(err, payments) {
+  Payment.find({}, function (err, payments) {
     if (!err) {
       res.render("allpayments", {
         paymentsmade: payments,
@@ -339,12 +377,12 @@ app.post("/addlist", (req, res) => {
     let eachshare = cost / sharelen;
 
     if (keshavshare === 1) {
-      Balance.findOne({}, function(err, response) {
+      Balance.findOne({}, function (err, response) {
         if (!err) {
           const newbalance = response.keshavExpenses + eachshare;
           Balance.updateOne({}, {
             keshavExpenses: newbalance
-          }, function(err) {
+          }, function (err) {
             if (err) {
               console.log(err);
             }
@@ -354,13 +392,13 @@ app.post("/addlist", (req, res) => {
       shareamong.push("Keshav");
     }
     if (sakshamshare === 1) {
-      Balance.findOne({}, function(err, response) {
+      Balance.findOne({}, function (err, response) {
         if (!err) {
           if (whopaid === "saksham") {
             const newbalance = response.sakshamBalance + eachshare - cost;
             Balance.updateOne({}, {
               sakshamBalance: newbalance
-            }, function(err) {
+            }, function (err) {
               if (err) {
                 console.log(err);
               }
@@ -369,7 +407,7 @@ app.post("/addlist", (req, res) => {
             const newbalance = response.sakshamBalance + eachshare;
             Balance.updateOne({}, {
               sakshamBalance: newbalance
-            }, function(err) {
+            }, function (err) {
               if (err) {
                 console.log(err);
               }
@@ -380,13 +418,13 @@ app.post("/addlist", (req, res) => {
       shareamong.push("Saksham");
     }
     if (kishanshare === 1) {
-      Balance.findOne({}, function(err, response) {
+      Balance.findOne({}, function (err, response) {
         if (!err) {
           if (whopaid === "kishan") {
             const newbalance = response.kishanBalance + eachshare - cost;
             Balance.updateOne({}, {
               kishanBalance: newbalance
-            }, function(err) {
+            }, function (err) {
               if (err) {
                 console.log(err);
               }
@@ -395,7 +433,7 @@ app.post("/addlist", (req, res) => {
             const newbalance = response.kishanBalance + eachshare;
             Balance.updateOne({}, {
               kishanBalance: newbalance
-            }, function(err) {
+            }, function (err) {
               if (err) {
                 console.log(err);
               }
@@ -406,13 +444,13 @@ app.post("/addlist", (req, res) => {
       shareamong.push("Kishan");
     }
     if (sachinshare === 1) {
-      Balance.findOne({}, function(err, response) {
+      Balance.findOne({}, function (err, response) {
         if (!err) {
           if (whopaid === "sachin") {
             const newbalance = response.sachinBalance + eachshare - cost;
             Balance.updateOne({}, {
               sachinBalance: newbalance
-            }, function(err) {
+            }, function (err) {
               if (err) {
                 console.log(err);
               }
@@ -421,7 +459,7 @@ app.post("/addlist", (req, res) => {
             const newbalance = response.sachinBalance + eachshare;
             Balance.updateOne({}, {
               sachinBalance: newbalance
-            }, function(err) {
+            }, function (err) {
               if (err) {
                 console.log(err);
               }
@@ -465,7 +503,7 @@ app.post("/addlist", (req, res) => {
 //   res.redirect("/");
 // })
 
-app.get("/logout", function(req, res) {
+app.get("/logout", function (req, res) {
   req.logout();
   res.redirect('/');
 });
@@ -481,6 +519,6 @@ if (port == null || port == "") {
   port = 300;
 }
 
-app.listen(port, function() {
+app.listen(port, function () {
   console.log("Server started on port 300");
 });
