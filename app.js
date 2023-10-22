@@ -8,6 +8,7 @@ const mongoose = require('mongoose');
 const session = require('express-session');
 const passport = require('passport');
 const passportLocalMongoose = require('passport-local-mongoose');
+const password = process.env.PASSWORD;
 
 const app = express();
 
@@ -38,10 +39,11 @@ app.use(passport.session());
 
 // const mongoose = require('mongoose');
 
-mongoose.connect('mongodb+srv://keshavtomar:keshav123@cluster0.ibzyjol.mongodb.net/BahikhaataDB', { useNewUrlParser: true, useUnifiedTopology: true }, (err) => {
+mongoose.connect('mongodb+srv://keshavtomar:'+password+'@cluster0.ibzyjol.mongodb.net/BahikhaataDB', { useNewUrlParser: true, useUnifiedTopology: true }, (err) => {
     if (err) {
         console.error("Error connecting to the database: " + err);
     } else {
+      console.log("Database connection successfull");
         // Define the Balance model based on your schema
         // const Balance = mongoose.model('Balance', {
         //   sachinBalance: Number,
@@ -166,7 +168,7 @@ app.post("/failure", (req, res) => {
 
 app.get("/", (req, res) => {
   Balance.findOne({}, (err,resultingbalance) => {
-    console.log("this is it     " + resultingbalance);
+    // console.log("this is it     " + resultingbalance);
     if (err) {
       console.log(err);
     } else {
